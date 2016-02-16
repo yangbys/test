@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+<title>scrollTop</title>
+<script src="//cdn.bootcss.com/jquery/1.12.0/jquery.min.js"></script>
+<style type="text/css" media="all">
+    body {margin:0; padding:0;}
+    .header {background:#f2f2f2; padding:20px 0;}
+    .header ul {overflow:hidden; width:1000px; margin:0 auto;}
+    .header ul li {display: inline-block; padding:10px 20px; border:1px solid #d8d8d8; margin-right:10px; border-radius:2px;}
+    .banner {margin:220px 0 0; text-align: center; border-top:2px solid red;}
+    .box {width:1000px; margin:0 auto; height:1000px; background:green;}
+</style>
+</head>
+    <div class="header">
+        <ul>
+            <li>导航啦</li>
+            <li>导航啦</li>
+            <li>导航啦</li>
+            <li>导航啦</li>
+        </ul>
+    </div>
+    <div class="banner"><img src="http://www.xichaokeji.com/images/images/indexbanner1.png" ></div>
+
+    <div class="box">来啦</div>
+
+    <script>
+        var scroll = function(ele, option){
+            return this.init.apply(this,arguments);
+        }
+
+        scroll.prototype = {
+            init : function(el, option){
+                this.el = typeof el === 'string' ? $(el) : el;
+
+                var opt = option || {};
+                opt.targetDom = option.targetDom || document.body;
+                opt.classes = option.classes || {};
+
+                this.lastScrollY = $(opt.targetDom).offset().top;
+                this.offset = this.el.outerHeight();
+                this.opt = opt;
+                this.bindUI();
+                this.update();
+                console.log(opt)
+                this.init = null;
+            },
+            update : function(){
+
+                var currentY = this.scrollY(),
+                    isScrollY = !!(Math.abs(currentY - this.lastScrollY) >= 5);
+                console.log(currentY,this.lastScrollY);
+                if(isScrollY){
+                    if (currentY > this.lastScrollY && currentY >= this.offset) {
+                        this.down();
+                    }
+                    else if (currentY < this.lastScrollY) {
+                        this.up();
+                    }
+                }
+
+                this.lastScrollY = currentY;
+            },
+            bindUI : function(){
+                $(window).on('scroll',function(){
+                    this.update();
+                }.bind(this))
+            },
+            destroy : function(){
+
+            },
+            down : function(){
+                console.log('down')
+            },
+            up : function(){
+                console.log('up')
+            },
+            scrollY : function(){
+                return window.pageYOffset !== undefined ? window.pageYOffset : (document.body || document.documentElemnet).scrollTop;
+            }
+        }
+
+        var _header = new scroll('.header',{
+            targetDom : '.banner',
+            classes : {
+                up : 'upClass',
+                down : 'downClass'
+            }
+        })
+    </script>
+
+
+</body>
+</html>
