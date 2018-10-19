@@ -1,0 +1,16 @@
+{
+  "name": "test_first_npmjs",
+  "version": "1.0.2",
+  "description": "test",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "yangbys",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yangbys/test2.git"
+  },
+  "homepage": "https://github.com/yangbys/test2"
+}
