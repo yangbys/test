@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+<link href="os-animate.css" rel="stylesheet"/>
+<script src="jquery.min.js"></script>
+<title>animated</title>
+
+<style type="text/css" media="all">
+body,ul,li { padding:0; margin:0; border:0;}
+body { font-size:12px; -webkit-user-select:none; -webkit-text-size-adjust:none; font-family:helvetica; overflow:hidden;}
+.main {display:none; position:absolute; width: 100%; height:100%; left:0; top:0;}
+.btnArea {padding:20px; background:#f2f2f2; text-align: center;}
+.btnArea .btn {display:inline-block; padding:10px 25px; border-radius: 2px; margin-right:10px; background:#ff6600; color:#fff; cursor:pointer; -webkit-transition:background-color .5s;transition:background-color .5s;}
+.btnArea .btn:hover,.btnArea .btn.cur  {background-color: green;}
+.pageContent {overflow: hidden; position:relative; border:2px solid #d8d8d8; width:1000px; height:300px; margin:10px auto;}
+.page {position:absolute; width:100%; height:100%; left:0; top:0;  visibility: hidden; z-index: 2; color:#fff; text-align: center; line-height: 100px; font-size:30px;}
+.page1 {z-index: 4; background-color: green;}
+.page2 { background-color: red;}
+.page3 { background-color: blue;}
+.page4 { background-color: #ff6600;}
+.page.cur {visibility:visible;}
+
+.order {position:absolute; width: 100%; height:100%; left:0; top:0;}
+.tab {padding:20px 0; text-align: center;}
+.tab span {display:inline-block; padding:10px 25px; border-radius: 2px; margin-right:10px; background:#ff6600; color:#fff; cursor:pointer; -webkit-transition:background-color .5s;transition:background-color .5s;}
+.tab span:hover,.tab span.cur  {background-color: green;}
+.list {line-height: 0; padding:20px; border:2px solid red; width:100%; display: block; box-sizing: border-box;}
+.list li.transition {
+    -webkit-transition:-webkit-transform ease-out .5s;
+    transition:transform ease-out .5s;
+}
+.list li {display:inline-block; width:100px; height:100px; margin:0 10px 10px 0;}
+.list li span {display:block; background:#f2f2f2; width:100px; height:100px; line-height: 100px; font-size:20px; text-align: center;}
+.list li[data-num="2"] span {background:#ff6600; color:#fff;}
+.list li[data-num="4"] span {background:green; color:#fff;}
+.list li[data-num="6"] span {background:#007BFF; color:#fff;}
+.list li[data-num="10"] span {background:#7D3200; color:#fff;}
+.content {position:relative;}
+.content .tab-c {position:absolute; left:0; top:0; width:100%;}
+</style>
+</head>
+<body>
+    <div class="main">
+        <div class="btnArea">
+            <span class="btn btn1 cur">按钮一</span>
+            <span class="btn btn2">按钮二</span>
+            <span class="btn btn3">按钮三</span>
+            <span class="btn btn4">按钮四</span>
+        </div>
+
+        <div class="pageContent">
+            <div class="page page1 cur">页面1</div>
+            <div class="page page2">页面2</div>
+            <div class="page page3">页面3</div>
+            <div class="page page4">页面4</div>
+        </div>
+    </div>
+
+
+	<div class="order">
+		<div class="tab">
+			<span data-type="all" class="cur">不限</span>
+			<span data-type="10">10人</span>
+			<span data-type="6">6人</span>
+			<span data-type="4">4人</span>
+			<span data-type="2">2人</span>
+		</div>
+		<div class="content">
+			<div class="tab-c">
+				<ul class="list">
+					<li data-num="10"><span>10人</li>
+					<li data-num="4"><span>4人</li>
+					<li data-num="2"><span>2人</span></li>
+					<li data-num="10"><span>10人</span></li>
+					<li data-num="4"><span>4人</span></li>
+					<li data-num="4"><span>4人</span></li>
+					<li data-num="6"><span>6人</span></li>
+					<li data-num="2"><span>2人</span></li>
+					<li data-num="10"><span>10人</span></li>
+					<li data-num="2"><span>2人</span></li>
+					<li data-num="4"><span>4人</span></li>
+					<li data-num="2"><span>2人</span></li>
+					<li data-num="10"><span>10人</span></li>
+					<li data-num="4"><span>4人</span></li>
+					<li data-num="4"><span>4人</span></li>
+					<li data-num="10"><span>10人</span></li>
+					<li data-num="6"><span>6人</span></li>
+					<li data-num="10"><span>10人</span></li>
+					<li data-num="2"><span>2人</span></li>
+					<li data-num="2"><span>2人</span></li>
+					<li data-num="4"><span>4人</span></li>
+					<li data-num="2"><span>2人</span></li>
+					<li data-num="10"><span>10人</span></li>
+					<li data-num="4"><span>4人</span></li>
+					<li data-num="4"><span>4人</span></li>
+					<li data-num="10"><span>10人</span></li>
+					<li data-num="4"><span>4人</span></li>
+					<li data-num="4"><span>4人</span></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+    <script>
+
+		var order = {
+			filterObj: {},
+			sort : function(type){
+                //处理上一个没有执行完成的动画
+                if (this.hasClear !== undefined && !this.hasClear) {
+                    console.log('clearEnd')
+                    this.endClear();
+                }
+                this.hasClear = false;
+				// 当前场景内容
+				var currentObj = $('.tab-c');
+				//复制一份当前场景内容
+				var $cloneObj = currentObj.clone().appendTo($('.content')).css('visibility','hidden');
+                $cloneObj.find('li').show();
+				this.$clone = $cloneObj;
+				var $cloneFilterData,currentFilterData,$target;
+				if(type == 'all'){
+	                this.$cloneFilterData = $cloneFilterData = $cloneObj.find('li');
+                    this.currentFilterData  = currentFilterData = {};
+	                this.$target = $target = currentObj.find('li');
+	                // var typeCode = 1;
+				}else{
+					//在复制模板上找到目标元素
+					this.$cloneFilterData = $cloneFilterData = $cloneObj.find('li[data-num="'+type+'"]');
+					//在当前场景上找上(目标之外)元素加上样式
+					this.currentFilterData = currentFilterData = currentObj.find('li').not('[data-num="'+type+'"]').removeClass('in').addClass('hide-out');
+					//在当前场景上找到目标元素
+					this.$target = $target = currentObj.find('[data-num="' + type + '"]');
+					//在复制模板上找到(目标之外)元素隐藏掉，目的就是排成一行，好计算位置
+					$cloneObj.find('li').not('[data-num="' + type + '"]').hide();
+				}
+
+				//初始化 确保位置
+				$cloneFilterData.show().removeClass('pop out');
+
+				//获取在当前场景为显示状态的目标元素
+				var $visibleTarget = $target.not('.hide-out').addClass('transition');
+				this.$visibleTarget = $visibleTarget;
+				//将隐藏的显示出来
+				var $hiddenTarget = $target.not($visibleTarget).show();
+
+				//元素定位，当前场景没有显示的元素在最终位置popup出来，已存在场景的元素通过动画平移到最终位置
+				$.each($target, function (i, n) {
+					if ($(this).hasClass('hide-out')) {
+						$(this).removeClass('hide-out');
+						var y = $cloneFilterData.eq(i).position().top;
+						var x = $cloneFilterData.eq(i).position().left;
+						$(this).css({ 'position': 'absolute', 'top': y, 'left': x });
+					}
+					else {
+						var y = $cloneFilterData.eq(i).position().top - $(this).position().top;
+						var x = $cloneFilterData.eq(i).position().left - $(this).position().left;
+						$(this).css({ '-webkit-transform': 'translateX(' + x + 'px) translateY(' + y + 'px)' });
+					}
+
+				});
+
+                //将隐藏的元素显示出来
+				$hiddenTarget.addClass('pop in').removeClass('out');
+
+                //如果不是 ‘type = all’
+				if (!$.isEmptyObject(currentFilterData)) {
+					currentFilterData.addClass('pop out');
+				}
+
+				var self = this;
+				this.sortTimer = setTimeout(function () {
+		           self.endClear();
+		        },1000);
+
+                this.$visibleTarget.first().one('webkitTransitionEnd', function () {
+                    self.sortTimerT = setTimeout(function () {
+                       self.endClear.call(self);
+                    }, 200);
+                });
+                $hiddenTarget.first().one('webkitAnimationEnd', function () {
+                    self.sortTimerA = setTimeout(function () {
+                       self.endClear.call(self);
+                    }, 200);
+                });
+
+
+			},
+			endClear : function(){
+                if (this.hasClear) { return false; }
+                this.hasClear = true;
+				clearTimeout(this.sortTimer);
+                clearTimeout(this.sortTimerT);
+                clearTimeout(this.sortTimerA);
+				this.$clone.remove();
+		        //$('.table-content.active:gt(0)').remove();
+		        if (!$.isEmptyObject(this.currentFilterData)) {
+		            this.currentFilterData.hide();
+		        }
+		        this.$visibleTarget.removeClass('transition');
+		        this.$target.removeClass('pop').removeAttr('style');
+			}
+		}
+
+		$('.tab').on('click','span',function(){
+			var _type = $(this).data('type');
+            $(this).addClass('cur').siblings('.cur').removeClass('cur')
+			order.sort(_type)
+		});
+        order.sort('all')
+    </script>
+
+
+</body>
+</html>

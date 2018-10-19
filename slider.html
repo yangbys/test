@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+<title>slider</title>
+<style type="text/css" media="all">
+body,ul,li { padding:0; margin:0; list-style: none;}
+body { font-size:12px; height: 2000px; -webkit-user-select:none; -webkit-text-size-adjust:none; font-family:helvetica;}
+.box {width:320px; margin:20px auto; border:5px solid #f2f2f2; padding:20px;}
+.sliderMain {position:relative; overflow:hidden; background:#f1f1f1;}
+.sliderMain .sliderList {overflow:hidden;}
+.sliderMain .sliderList li {position:relative;}
+.sliderList li item {}
+.sliderList li img {width:100%; max-width: 100%; display:block;}
+.sliderList li span {display:block; position:absolute; bottom:0; left:0; width:100%; padding:10px; box-sizing:border-box; background-color:rgba(0,0,0,.8); color:#fff;}
+.dotPage {position:absolute; width:100%; bottom:10px; right:5px; text-align: right;}
+.dotPage span {display:inline-block; width:10px; height:10px; border-radius: 50%; margin-right:5px; background:rgba(255, 255, 255, 0.8);}
+.dotPage span.cur {background: #ff6600;}
+</style>
+</head>
+<div style="height:150px; background:#f2f2f2;">fda</div>
+    <div class="test" style="position:fixed; bottom:0; left:0; width:100%; padding:10px 0; background:red; color:#fff; text-align:center;">test</div>
+    <div class="sliderMain">
+        <ul class="sliderList">
+            <li><div class="item"><img data-src="http://www.update8.com/images/01.jpg" src='http://misc.360buyimg.com/product/home/1.0.0/widget/floor/i/loading.gif'></div><span>我是标题1</span></li>
+            <li><div class="item"><img data-src="http://www.update8.com/images/02.jpg" src='http://misc.360buyimg.com/product/home/1.0.0/widget/floor/i/loading.gif'></div><span>我是标题2</span></li>
+            <li><div class="item"><img data-src="http://www.update8.com/images/03.jpg" src='http://misc.360buyimg.com/product/home/1.0.0/widget/floor/i/loading.gif'></div><span>我是标题3</span></li>
+            <li><div class="item"><img data-src="http://www.update8.com/images/04.jpg" src='http://misc.360buyimg.com/product/home/1.0.0/widget/floor/i/loading.gif'></div><span>我是标题4</span></li>
+            <li><div class="item"><img data-src="http://www.update8.com/images/05.jpg" src='http://misc.360buyimg.com/product/home/1.0.0/widget/floor/i/loading.gif'></div><span>我是标题5</span></li>
+            <li><div class="item"><img data-src="http://cdn.guopan.cn/uploads/static/img/home-bg_3502fe8.jpg" src='http://misc.360buyimg.com/product/home/1.0.0/widget/floor/i/loading.gif'></div><span>我是标题5</span></li>
+        </ul>
+    </div>
+
+
+    <script>
+        var slider = function(obj,param){
+            if(!obj) return;
+            return new _s(obj,param);
+        }
+
+        var _s = function(){
+            this.init.apply(this,arguments);
+        }
+
+        _s.prototype = {
+            init : function(obj, option){
+
+                obj = typeof obj === 'string' ? this.getElement(obj) : obj;
+                obj.style.display = 'none';
+
+                var opt = {
+                    list : '.sliderList',
+                    item : '.item',
+                    dataSrc : 'data-src',
+                    imgSrc : 'http://misc.360buyimg.com/product/home/1.0.0/widget/floor/i/loading.gif',
+                    isTitle : true,
+                    page : true,
+                    autoPlay : true,
+                    speend : 5000,
+                    loadAfter : null
+                }
+
+                if(option){
+                    for(var key in option){
+                        if(option.hasOwnProperty(key)){
+                            opt[key] = option[key];
+                        }
+                    }
+                }
+                console.log(opt);
+
+                this.el = obj.querySelector(opt.list);
+                this.opt = opt;
+                this._index = 0;
+
+                this._item = this.el.querySelectorAll(opt.item);
+                var len = this._item.length;
+
+                var firstImg = this._item[0];
+                var _images = new Image();
+                _images.onload = _images.onerror = function(){
+                    obj.style.display = 'block';
+                }
+                _images.src = firstImg.querySelector('img').getAttribute(opt.dataSrc || 'src');
+
+
+                if(len && opt.page){
+                    var dotHtml = '';
+                    for (var i = 0; i < len; i++) {
+                        dotHtml += '<span></span>';
+                    }
+                    obj.insertAdjacentHTML('beforeEnd','<div class="dotPage">'+dotHtml+'</div>');
+                    var _page = this.getElement('.dotPage');
+                    this.page = _page.querySelectorAll('span');
+                    this.page[0].classList.add('cur');
+                }
+
+                this.len = len;
+                this.isScrollX;
+                this.initStyle();
+                this.bindUI();
+                this.goTransform(0);
+                this.init = null;
+            },
+            initStyle : function(){
+                var _el = this.el,
+                    _opt = this.opt,
+                    _item = this._item;
+
+                if(this.len){
+                    var _w = this.getWin().w;
+                    _el.style.width = this.len * _w + 'px';
+                    Array.prototype.forEach.call(_item,function(item,i){
+                        item.style.cssText = 'float:left; width:'+_w+'px';
+                    });
+                }
+            },
+            bindUI : function(){
+                var _el = this.el;
+
+                this.isRun = false;
+                _el.addEventListener('touchstart', this, false);
+                _el.addEventListener('touchmove', this, false);
+                _el.addEventListener('touchend', this, false);
+                window.addEventListener('resize', this, false);
+
+                //自动轮播
+                if(this.opt.autoPlay && this.len > 1){
+                    this.autoPlay();
+                }
+            },
+            destory : function(){
+                var _el = this.el;
+                this.timer && clearInterval(this.timer),this.timer=null;
+                _el.moveEventListener('touchstart', this, false);
+                _el.moveEventListener('touchmove', this, false);
+                _el.moveEventListener('touchend', this, false);
+            },
+            autoPlay : function(){
+                this.timer && clearInterval(this.timer),this.timer=null;
+                this.timer == null && (this.timer = setInterval(time,this.opt.speend));
+                var _index = this._index;
+                var _self = this;
+                function time(){
+                    ++_index;
+                    _index = _index > _self.len-1 ? 0 : _index;
+                    _self._index = _index;
+                    _self.goTransform(_index);
+                }
+            },
+            handleEvent : function(e){
+                var _type = e.type;
+                if(_type){
+                    switch (_type) {
+                        case 'touchstart':
+                            this.touchstart(e);
+                            break;
+                        case 'touchmove':
+                            this.touchmove(e);
+                            break;
+                        case 'touchend':
+                            this.touchend(e);
+                            break;
+                        case 'resize':
+                            this.setResize(e);
+                            break;
+                    }
+                }
+            },
+            getStart : function(e){
+                return {
+                    _x : e.targetTouches[0].pageX || e.touches[0].pageX,
+                    _y : e.targetTouches[0].pageY || e.touches[0].pageY
+                }
+            },
+            touchstart : function(e){
+                var _s = this.getStart(e);
+                this.timer && clearInterval(this.timer),this.timer=null;
+                this.isRun = true;
+                this.startTime = new Date() * 1;
+                this.posX = 0;
+                this.getTran = parseInt(this.getTransform(this.el)) || 0;
+                this._startX = _s._x;
+                this._startY = _s._y;
+                this.isScrollX = undefined;
+            },
+            touchmove : function(e){
+                if(this.isRun){
+                    var _s = this.getStart(e),posX;
+                    var _index = this._index;
+                    var _tran = parseInt(this.getTran)
+                    posX = _s._x - this._startX;
+                    posY = _s._y - this._startY;
+                    this._distance = posX + _tran;
+                    this.posX = posX;
+                    console.log(posY)
+
+                    if (typeof this.isScrollX == 'undefined') {
+                        this.isScrollX = !!(Math.abs(posX) > Math.abs(posY));
+                    }
+                    if( this.isScrollX ){
+                        e.preventDefault();
+                        this.setTransform({
+                            x : this._distance,
+                            t : 0
+                        });
+                    }
+
+                    if((_index <= 0 && posX > 0) || (_index >= this.len-1) && posX < 0){
+                        this._distance = _tran + posX * 0.3;
+                    }
+
+                }
+            },
+            touchend : function(e){
+                if(this.posX == 0) return;
+                if(this.isRun && this.isScrollX){
+                    var endTime = new Date() * 1;
+                    var _percent = this.getWin().w / 6;
+                    var _index = this._index;
+                    var _posX = this.posX;
+                    var _len = this.len;
+                    if(endTime - this.startTime > 50 && Math.abs(_posX) >= _percent){
+                        _index = _posX > _percent ? (_index <= 0 ? 0 : --_index) : (_index >= _len-1 ? _len-1 : ++_index);
+                        this._index = _index;
+                        this.goTransform(_index);
+                    }else{
+                        this.goTransform(_index);
+                    };
+                }
+                this.autoPlay();
+                this.isRun = false;
+            },
+            setResize : function(){
+                this.getWin();
+                this.initStyle();
+                this.goTransform(this._index);
+                this.timer && clearInterval(this.timer),this.timer=null;
+                this.autoPlay();
+            },
+            goTransform : function(n){
+                var _item = this._item[n];
+                var _img = _item.querySelector('img');
+                var _opt = this.opt;
+                if(_img && _img.getAttribute(_opt.dataSrc)){
+                    _img.setAttribute('src',_img.getAttribute(_opt.dataSrc));
+                    _img.removeAttribute(_opt.dataSrc);
+                    if(typeof _opt.loadAfter === 'function'){
+                        _opt.loadAfter.call(this,_img);
+                    }
+                }
+                var _w = this.getWin().w * n;
+                this.setTransform({
+                    x : -_w,
+                    t : 1
+                });
+                if(_opt.page){
+                    this.setDotCur(n);
+                }
+            },
+            setDotCur : function(n){
+                var _page = this.page;
+                var _className = 'cur';
+                var _item;
+                Array.prototype.forEach.call(_page,function(item,i){
+                    _item = item.classList;
+                    if(_item.contains(_className)){
+                        _item.remove(_className);
+                    }
+                });
+                _page[n].classList.add(_className);
+            },
+            setTransform : function(opt){
+                var _el = this.el;
+                _el.style.webkitTransition = opt.t ? 'all .5s' : 'none';
+                _el.style.webkitTransform = 'translate3d('+opt.x+'px,0,0)';
+            },
+            getTransform : function(o){
+                return window.getComputedStyle(o)['webkitTransform'].split(',')[4];
+            },
+            getWin : function(){
+                return {
+                    w : window.innerWidth,
+                    h : window.innerHeight
+                }
+            },
+            getElement : function(o){
+                return document.querySelector(o);
+            }
+        }
+
+
+        var _pic = slider('.sliderMain',{
+            item : 'li',
+            dataSrc : 'data-src',
+            isTitle : true,
+            loadAfter : function(item){
+                console.log(item.src)
+            }
+        })
+    </script>
+</body>
+</html>

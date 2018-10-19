@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+<title>slider</title>
+<style>
+    body {padding:0; margin:0;}
+    .tip {z-index: 9998; -webkit-transition:all .5s; transition:all .5s;}
+    .tip,.tipMask {position:fixed; width:100%; height:100%; background-color: rgba(0,0,0,.5); left:0; top:0;}
+    .tipContent {position:absolute; left:50%; top:50%; -webkit-transform:translate(-50%,-50%); z-index:9999; width:200px; height:200px; overflow-y:scroll; background:#fff;}
+    .hm {height: 400px; width:100px; background:red;}
+
+</style>
+</head>
+<body>
+    <div class="click1" style="padding:10px; width:100px; text-align:center; background:red; color:#fff; margin:20px auto;">点击我吧</div>
+    <div style="height:4000px;"> fdsa</div>
+    <div class="tip">
+
+        <div class="tipContent">
+            <div class="hm">test<br></div>
+        </div>
+    </div>
+    <div class="tipMask"></div>
+    <script>
+        document.body.addEventListener('touchmove',function(e){
+            var _target = e.target;
+            if(!_target.parentNode.classList.contains('tip') && !_target.parentNode.parentNode.classList.contains('tip')){
+                e.preventDefault();
+            }
+
+        },true)
+    </script>
+</body>
+</html>

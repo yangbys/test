@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+<title>Observer 观察者模式 - ( 又叫发布者-订阅者模式 )</title>
+<style type="text/css" media="all">
+    body {margin:0; padding:0;}
+    .btn {display:inline-block; margin: 10px; padding:8px 20px; background:green; color:#fff; border-radius: 3px; cursor:pointer;}
+</style>
+</head>
+    <div class="btn a1">订阅者1</div>
+    <div class="btn a2">订阅者2</div>
+    <div class="btn a3">订阅者3</div>
+
+
+
+    <script>
+        var observer ={
+            listen : {},
+            //订阅者
+            on : function(type, fn){
+                if(!this.listen[type]){
+                    this.listen[type] = [];
+                }
+                if(typeof fn === 'function'){
+                    this.listen[type].push(fn);
+                }
+            },
+            //发布者
+            fire : function(type){
+                var _list = this.listen[type];
+                if(_list){
+                    for(var i=0,max=this.listen[type].length; i<max; i++){
+                        if(typeof this.listen[type][i] === 'function'){
+                            this.listen[type][i].apply(this,[].slice.call(arguments,1));
+                        }
+                    }
+                }
+            },
+            //移除
+            remove : function(type){
+                if(this.listen[type]){
+                    delete this.listen[type];
+                }
+            }
+        }
+    </script>
+
+    <script>
+        var _btn = document.querySelectorAll('.btn'),item;
+
+        Array.prototype.forEach.call(_btn,function(n){
+            item = n;
+            var _className = item.classList;
+            if(_className.contains('a1')){
+                observer.on('a1',function(a,b){
+                    console.log('a1')
+                })
+            }else if(_className.contains('a2')){
+                observer.on('a2',function(a,b){
+                    console.log('a2')
+                })
+            }else if(_className.contains('a3')){
+                observer.on('a1',function(a,b){
+                    console.log('a3')
+                })
+            }
+
+            item.addEventListener('click',function(e){
+                var _targetName = this.classList;
+                if(_targetName.contains('a1')){
+                    observer.fire('a1',1,2);
+                }else if(_targetName.contains('a2')){
+                    observer.fire('a2','我是发布者2','哈哈2');
+                }else if(_targetName.contains('a3')){
+                    observer.fire('a3','我是发布者3','哈哈3');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
